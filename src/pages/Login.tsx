@@ -29,7 +29,7 @@ export default function Login() {
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-semibold text-purple-900 tracking-tight">Welcome back</h1>
-          <p className="mt-2 text-purple-300 text-sm">Continue your journey</p>
+          <p className="mt-2 text-purple-400 text-sm">Continue your journey</p>
         </div>
 
         <div className="bg-white rounded-3xl shadow-sm border border-purple-100 p-8">
