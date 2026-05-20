@@ -12,6 +12,43 @@ export interface UserProfile {
   updatedAt: string
 }
 
+export interface DiaryEntry {
+  id: string
+  userId: string
+  pillar: Pillar
+  content: string
+  mood: number
+  promptText: string
+  aiResponse: string
+  createdAt: string
+}
+
+export interface Question {
+  id: string
+  pillar: Pillar
+  text: string
+  orderIndex: number
+  createdAt: string
+}
+
+export interface QuestionnaireResponse {
+  id: string
+  userId: string
+  questionId: string
+  pillar: Pillar
+  answer: string
+  createdAt: string
+}
+
+export interface AdaptiveQuestionSet {
+  id: string
+  userId: string
+  pillar: Pillar
+  questionIds: string[]
+  generatedAt: string
+  createdAt: string
+}
+
 export interface CheckIn {
   id: string
   userId: string
