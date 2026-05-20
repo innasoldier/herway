@@ -4,15 +4,6 @@ import { supabase } from '../lib/supabase'
 import type { UserProfile } from '../types'
 import { toUserProfileRow } from '../lib/mappers'
 
-// ── equivalent to your getData() ──────────────────────────────
-interface ISignupData {
-  name: string
-  email: string
-  password: string
-  loading: boolean
-  error: string | null
-}
-
 const useSignupData = () => {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -29,7 +20,6 @@ const useSignupData = () => {
   }
 }
 
-// ── equivalent to your getMethods() ───────────────────────────
 const useSignupMethods = (data: ReturnType<typeof useSignupData>) => {
   const navigate = useNavigate()
 
@@ -86,7 +76,6 @@ const useSignupMethods = (data: ReturnType<typeof useSignupData>) => {
   return { handleSubmit }
 }
 
-// ── equivalent to your defineComponent() ──────────────────────
 export default function Signup() {
   const data = useSignupData()
   const methods = useSignupMethods(data)
