@@ -2,49 +2,94 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import type { UserProfile } from '../types'
+import { toUserProfileRow } from '../lib/mappers'
 
-export default function Signup() {
-  const navigate = useNavigate()
+// ── equivalent to your getData() ──────────────────────────────
+interface ISignupData {
+  name: string
+  email: string
+  password: string
+  loading: boolean
+  error: string | null
+}
+
+const useSignupData = () => {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
+  return {
+    name, setName,
+    email, setEmail,
+    password, setPassword,
+    loading, setLoading,
+    error, setError,
+  }
+}
 
-    const { data, error: signUpError } = await supabase.auth.signUp({ email, password })
+// ── equivalent to your getMethods() ───────────────────────────
+const useSignupMethods = (data: ReturnType<typeof useSignupData>) => {
+  const navigate = useNavigate()
 
-    if (signUpError || !data.user) {
-      setError(signUpError?.message ?? 'Something went wrong. Please try again.')
-      setLoading(false)
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  data.setLoading(true)
+  data.setError(null)
+
+  try {
+    const { data: authData, error: signUpError } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+    })
+
+    if (signUpError || !authData.user) {
+      data.setError(signUpError?.message ?? 'Something went wrong.')
       return
     }
 
     const now = new Date().toISOString()
     const profile: UserProfile = {
-      id: data.user.id,
-      name,
-      email,
-      avatarUrl: '',
+      id: authData.user.id,
+      name: data.name,
+      email: data.email,
+      avatarUrl: null,
       subscriptionStatus: 'free',
+      pillarFocus: null,
+      assessmentCompleted: false,
+      notificationToken: null,
       createdAt: now,
       updatedAt: now,
     }
 
-    const { error: profileError } = await supabase.from('profiles').insert(profile)
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .insert(toUserProfileRow(profile))
 
     if (profileError) {
-      setError(profileError.message)
-      setLoading(false)
+      data.setError(profileError.message)
       return
     }
 
     navigate('/')
+
+  } catch (err) {
+    data.setError('An unexpected error occurred. Please try again.')
+    console.error('Signup error:', err)
+
+  } finally {
+    data.setLoading(false)
   }
+}
+
+  return { handleSubmit }
+}
+
+// ── equivalent to your defineComponent() ──────────────────────
+export default function Signup() {
+  const data = useSignupData()
+  const methods = useSignupMethods(data)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-white flex items-center justify-center p-4">
@@ -55,7 +100,7 @@ export default function Signup() {
         </div>
 
         <div className="bg-white rounded-3xl shadow-sm border border-purple-100 p-8">
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={methods.handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-purple-800 mb-1.5">
                 Name
@@ -65,8 +110,8 @@ export default function Signup() {
                 type="text"
                 autoComplete="name"
                 required
-                value={name}
-                onChange={e => setName(e.target.value)}
+                value={data.name}
+                onChange={e => data.setName(e.target.value)}
                 placeholder="Your name"
                 className="w-full rounded-xl border border-purple-200 px-4 py-3 text-sm text-gray-800 placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition"
               />
@@ -81,8 +126,8 @@ export default function Signup() {
                 type="email"
                 autoComplete="email"
                 required
-                value={email}
-                onChange={e => setEmail(e.target.value)}
+                value={data.email}
+                onChange={e => data.setEmail(e.target.value)}
                 placeholder="you@example.com"
                 className="w-full rounded-xl border border-purple-200 px-4 py-3 text-sm text-gray-800 placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition"
               />
@@ -98,25 +143,25 @@ export default function Signup() {
                 autoComplete="new-password"
                 required
                 minLength={6}
-                value={password}
-                onChange={e => setPassword(e.target.value)}
+                value={data.password}
+                onChange={e => data.setPassword(e.target.value)}
                 placeholder="••••••••"
                 className="w-full rounded-xl border border-purple-200 px-4 py-3 text-sm text-gray-800 placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition"
               />
             </div>
 
-            {error && (
+            {data.error && (
               <div className="rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600">
-                {error}
+                {data.error}
               </div>
             )}
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={data.loading}
               className="w-full rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium py-3 text-sm transition"
             >
-              {loading ? 'Creating account…' : 'Create account'}
+              {data.loading ? 'Creating account…' : 'Create account'}
             </button>
           </form>
         </div>

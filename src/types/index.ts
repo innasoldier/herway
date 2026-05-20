@@ -4,10 +4,13 @@ export type SubscriptionStatus = 'free' | 'paid' | 'cancelled'
 
 export interface UserProfile {
   id: string
-  name: string
   email: string
-  avatarUrl: string
+  name: string | null
+  avatarUrl: string | null
   subscriptionStatus: SubscriptionStatus
+  pillarFocus: Pillar | null
+  assessmentCompleted: boolean
+  notificationToken: string | null
   createdAt: string
   updatedAt: string
 }
