@@ -3,6 +3,7 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
+import Chat from './pages/Chat'
 import NotFound from './pages/NotFound'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -20,6 +21,7 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+      <Route path="/chat" element={<Chat />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   )
