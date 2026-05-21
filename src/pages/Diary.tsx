@@ -75,7 +75,6 @@ const useDiaryMethods = (data: ReturnType<typeof useDiaryData>) => {
         pillar: data.pillar,
         content: data.content.trim(),
         mood: data.mood,
-        promptText: '',
         aiReflection: '',
         createdAt: now,
         updatedAt: now,

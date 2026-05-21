@@ -39,7 +39,6 @@ export function toDiaryEntry(row: any): DiaryEntry {
     pillar: row.pillar,
     content: row.content,
     mood: row.mood,
-    promptText: row.prompt_text,
     aiReflection: row.ai_reflection,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -54,7 +53,6 @@ export function toDiaryEntryRow(entry: Partial<DiaryEntry>): any {
   if (entry.pillar !== undefined)        row.pillar = entry.pillar
   if (entry.content !== undefined)       row.content = entry.content
   if (entry.mood !== undefined)          row.mood = entry.mood
-  if (entry.promptText !== undefined)    row.prompt_text = entry.promptText
   if (entry.aiReflection !== undefined)  row.ai_reflection = entry.aiReflection
   if (entry.createdAt !== undefined)     row.created_at = entry.createdAt
   if (entry.updatedAt !== undefined)     row.updated_at = entry.updatedAt

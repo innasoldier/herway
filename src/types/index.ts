@@ -21,7 +21,6 @@ export interface DiaryEntry {
   pillar: Pillar
   content: string
   mood: number
-  promptText: string
   aiReflection: string
   createdAt: string
   updatedAt: string
