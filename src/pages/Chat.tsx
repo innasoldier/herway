@@ -16,79 +16,52 @@ export default function Chat() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const sendMessage = async () => {
-    const text = input.trim()
-    if (!text || isStreaming) return
+const sendMessage = async () => {
+  const text = input.trim()
+  if (!text || isStreaming) return
 
-    setInput('')
-    setMessages(prev => [...prev, { role: 'user', content: text }])
-    setIsStreaming(true)
+  setInput('')
+  setMessages(prev => [...prev, { role: 'user', content: text }])
+  setIsStreaming(true)
+  setMessages(prev => [...prev, { 
+    role: 'assistant', 
+    content: '...', 
+    streaming: true 
+  }])
 
-    const assistantIndex = messages.length + 1
-    setMessages(prev => [...prev, { role: 'assistant', content: '', streaming: true }])
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text, userId: 'test' }),
+    })
 
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, userId: 'test' }),
-      })
+    const data = await response.json()
 
-      const reader = response.body?.getReader()
-      const decoder = new TextDecoder()
-      let buffer = ''
-
-      while (reader) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        buffer = lines.pop() ?? ''
-
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue
-          const payload = line.slice(6)
-          if (payload === '[DONE]') break
-
-          try {
-            const parsed = JSON.parse(payload)
-            if (parsed.text) {
-              setMessages(prev => {
-                const updated = [...prev]
-                updated[assistantIndex] = {
-                  ...updated[assistantIndex],
-                  content: updated[assistantIndex].content + parsed.text,
-                }
-                return updated
-              })
-            }
-          } catch {
-            // malformed chunk — skip
-          }
-        }
+    setMessages(prev => {
+      const updated = [...prev]
+      updated[updated.length - 1] = {
+        role: 'assistant',
+        content: data.text ?? data.error ?? 'Something went wrong.',
+        streaming: false,
       }
-    } catch {
-      setMessages(prev => {
-        const updated = [...prev]
-        updated[assistantIndex] = {
-          ...updated[assistantIndex],
-          content: 'Something went wrong. Please try again.',
-          streaming: false,
-        }
-        return updated
-      })
-    } finally {
-      setMessages(prev => {
-        const updated = [...prev]
-        if (updated[assistantIndex]) {
-          updated[assistantIndex] = { ...updated[assistantIndex], streaming: false }
-        }
-        return updated
-      })
-      setIsStreaming(false)
-    }
+      return updated
+    })
+
+  } catch {
+    setMessages(prev => {
+      const updated = [...prev]
+      updated[updated.length - 1] = {
+        role: 'assistant',
+        content: 'Something went wrong. Please try again.',
+        streaming: false,
+      }
+      return updated
+    })
+  } finally {
+    setIsStreaming(false)
   }
+}
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
