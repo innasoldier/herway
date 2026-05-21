@@ -1,4 +1,4 @@
-import type { UserProfile } from '../types'
+import type { UserProfile, DiaryEntry } from '../types'
 
 export function toUserProfile(row: any): UserProfile {
   return {
@@ -28,6 +28,36 @@ export function toUserProfileRow(profile: Partial<UserProfile>): any {
   if (profile.notificationToken !== undefined)    row.notification_token = profile.notificationToken
   if (profile.createdAt !== undefined)            row.created_at = profile.createdAt
   if (profile.updatedAt !== undefined)            row.updated_at = profile.updatedAt
+
+  return row
+}
+
+export function toDiaryEntry(row: any): DiaryEntry {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    pillar: row.pillar,
+    content: row.content,
+    mood: row.mood,
+    promptText: row.prompt_text,
+    aiReflection: row.ai_reflection,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }
+}
+
+export function toDiaryEntryRow(entry: Partial<DiaryEntry>): any {
+  const row: Record<string, unknown> = {}
+
+  if (entry.id !== undefined)            row.id = entry.id
+  if (entry.userId !== undefined)        row.user_id = entry.userId
+  if (entry.pillar !== undefined)        row.pillar = entry.pillar
+  if (entry.content !== undefined)       row.content = entry.content
+  if (entry.mood !== undefined)          row.mood = entry.mood
+  if (entry.promptText !== undefined)    row.prompt_text = entry.promptText
+  if (entry.aiReflection !== undefined)  row.ai_reflection = entry.aiReflection
+  if (entry.createdAt !== undefined)     row.created_at = entry.createdAt
+  if (entry.updatedAt !== undefined)     row.updated_at = entry.updatedAt
 
   return row
 }

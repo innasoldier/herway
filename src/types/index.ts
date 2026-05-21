@@ -22,8 +22,9 @@ export interface DiaryEntry {
   content: string
   mood: number
   promptText: string
-  aiResponse: string
+  aiReflection: string
   createdAt: string
+  updatedAt: string
 }
 
 export interface Question {
