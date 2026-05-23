@@ -5,6 +5,7 @@ import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
 import Chat from './pages/Chat'
 import Diary from './pages/Diary'
+import Privacy from './pages/Privacy'
 import NotFound from './pages/NotFound'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -31,6 +32,7 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+      <Route path="/privacy" element={<Privacy />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   )

@@ -161,6 +161,12 @@ export default function Signup() {
             Sign in
           </Link>
         </p>
+
+        <p className="text-center mt-3 text-xs text-purple-300">
+          <Link to="/privacy" className="hover:text-purple-500 transition">
+            Privacy Policy
+          </Link>
+        </p>
       </div>
     </div>
   )
