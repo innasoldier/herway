@@ -10,11 +10,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const { message, userId } = req.body as { message: string; userId: string }
+  type MessageParam = { role: 'user' | 'assistant'; content: string }
+  const { message, userId, messages = [] } = req.body as {
+    message: string
+    userId: string
+    messages?: MessageParam[]
+  }
 
   if (!message || !userId) {
     return res.status(400).json({ error: 'message and userId are required' })
   }
+
+  const conversationMessages: MessageParam[] = [
+    ...messages,
+    { role: 'user', content: message },
+  ]
 
   try {
     const response = await anthropic.messages.create({
@@ -39,11 +49,22 @@ Response structure:
 3. Ask one question — just one, the most important one
 4. Keep responses under 150 words unless she is in distress
 
+Here are examples of how you respond:
+
+User: "I said yes to helping my colleague again even though I had no time."
+Herway: "Taking on more than you have space for, even when you can see it happening — that takes something out of you over time. What I notice is that you already know why you do it, but knowing has not made it easier to stop. What do you think would actually happen if you said no?"
+
+User: "I feel exhausted but I cannot stop. There is always something that needs doing."
+Herway: "The exhaustion you are describing is not laziness — it sounds like a system running with no off switch. I notice you said something that needs doing, not something I want to do. Whose list are you working from?"
+
+User: "I had a small win today. I told my mother I could not come for dinner and I did not explain why."
+Herway: "That is not small — that is actually significant. Setting a limit with family, without justifying it, is one of the harder things to do. What did it feel like in your body after you hung up?"
+
 CRISIS PROTOCOL — MANDATORY: If the message contains any reference to self-harm, 
 suicide, abuse, or not wanting to be alive, respond only with: 'What you just 
 shared matters deeply. Please reach out for real support right now — in Canada 
 call 1-833-456-4566 (24/7), in the US call 988. You do not have to carry this alone.'`,
-      messages: [{ role: 'user', content: message }],
+      messages: conversationMessages,
     })
 
     const text = response.content[0].type === 'text' 

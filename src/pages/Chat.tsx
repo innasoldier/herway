@@ -20,20 +20,22 @@ const sendMessage = async () => {
   const text = input.trim()
   if (!text || isStreaming) return
 
+  const history = messages.map(({ role, content }) => ({ role, content }))
+
   setInput('')
   setMessages(prev => [...prev, { role: 'user', content: text }])
   setIsStreaming(true)
-  setMessages(prev => [...prev, { 
-    role: 'assistant', 
-    content: '...', 
-    streaming: true 
+  setMessages(prev => [...prev, {
+    role: 'assistant',
+    content: '...',
+    streaming: true
   }])
 
   try {
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text, userId: 'test' }),
+      body: JSON.stringify({ message: text, userId: 'test', messages: history }),
     })
 
     const data = await response.json()
