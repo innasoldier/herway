@@ -6,6 +6,8 @@ import Dashboard from './pages/Dashboard'
 import Chat from './pages/Chat'
 import Diary from './pages/Diary'
 import Assessment from './pages/Assessment'
+import Profile from './pages/Profile'
+import Settings from './pages/Settings'
 import Privacy from './pages/Privacy'
 import NotFound from './pages/NotFound'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -49,6 +51,22 @@ export default function App() {
         element={
           <ProtectedRoute>
             <Assessment />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <Settings />
           </ProtectedRoute>
         }
       />
