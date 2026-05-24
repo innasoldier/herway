@@ -5,6 +5,7 @@ import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
 import Chat from './pages/Chat'
 import Diary from './pages/Diary'
+import Assessment from './pages/Assessment'
 import Privacy from './pages/Privacy'
 import NotFound from './pages/NotFound'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -23,12 +24,24 @@ export default function App() {
           </ProtectedRoute>
         }
       />
-      <Route path="/chat" element={<Chat />} />
+      <Route path="/chat" element={
+          <ProtectedRoute>
+            <Chat />
+          </ProtectedRoute>
+        } />
       <Route
         path="/diary"
         element={
           <ProtectedRoute>
             <Diary />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/assessment"
+        element={
+          <ProtectedRoute>
+            <Assessment />
           </ProtectedRoute>
         }
       />

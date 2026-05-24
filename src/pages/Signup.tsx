@@ -62,7 +62,7 @@ const useSignupMethods = (data: ReturnType<typeof useSignupData>) => {
       return
     }
 
-    navigate('/')
+    navigate('/assessment')
 
   } catch (err) {
     data.setError('An unexpected error occurred. Please try again.')

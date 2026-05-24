@@ -11,10 +11,13 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.97.1",
+    "@hookform/resolvers": "^5.4.0",
     "@supabase/supabase-js": "^2.105.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^6.30.0"
+    "react-hook-form": "^7.76.1",
+    "react-router-dom": "^6.30.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
