@@ -11,10 +11,15 @@ export default function Chat() {
   const [input, setInput] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  useEffect(() => {
+    return () => { abortControllerRef.current?.abort() }
+  }, [])
 
 const sendMessage = async () => {
   const text = input.trim()
@@ -32,10 +37,13 @@ const sendMessage = async () => {
   }])
 
   try {
+    abortControllerRef.current = new AbortController()
+
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: text, userId: 'test', messages: history }),
+      signal: abortControllerRef.current.signal,
     })
 
     const data = await response.json()
@@ -50,7 +58,10 @@ const sendMessage = async () => {
       return updated
     })
 
-  } catch {
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      return
+    }
     setMessages(prev => {
       const updated = [...prev]
       updated[updated.length - 1] = {
@@ -115,6 +126,17 @@ const sendMessage = async () => {
             disabled={isStreaming}
             className="flex-1 resize-none rounded-2xl border border-purple-200 px-4 py-3 text-sm text-gray-800 placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition disabled:opacity-50"
           />
+          {isStreaming && (
+            <button
+              onClick={() => abortControllerRef.current?.abort()}
+              className="rounded-2xl bg-purple-100 hover:bg-purple-200 text-purple-600 p-3 transition"
+              aria-label="Stop"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
+                <rect x="3" y="3" width="10" height="10" rx="1" />
+              </svg>
+            </button>
+          )}
           <button
             onClick={sendMessage}
             disabled={isStreaming || !input.trim()}

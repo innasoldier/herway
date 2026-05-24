@@ -17,6 +17,7 @@ const useDiaryData = () => {
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [streamingReflection, setStreamingReflection] = useState('')
 
   return {
     content, setContent,
@@ -26,6 +27,7 @@ const useDiaryData = () => {
     loading, setLoading,
     saving, setSaving,
     error, setError,
+    streamingReflection, setStreamingReflection,
   }
 }
 
@@ -110,7 +112,10 @@ const useDiaryMethods = (data: ReturnType<typeof useDiaryData>) => {
             if (payload === '[DONE]') break
             try {
               const parsed = JSON.parse(payload)
-              if (parsed.text) aiReflection += parsed.text
+              if (parsed.text) {
+                aiReflection += parsed.text
+                data.setStreamingReflection(prev => prev + parsed.text)
+              }
             } catch {
               // skip malformed chunk
             }
@@ -123,6 +128,7 @@ const useDiaryMethods = (data: ReturnType<typeof useDiaryData>) => {
         .update({ ai_reflection: aiReflection, updated_at: new Date().toISOString() })
         .eq('id', entry.id)
 
+      data.setStreamingReflection('')
       data.setEntries(prev => [{ ...entry, aiReflection }, ...prev])
       data.setContent('')
     } catch (err) {
@@ -210,6 +216,13 @@ export default function Diary() {
           >
             {data.saving ? 'Saving…' : 'Save entry'}
           </button>
+
+          {data.streamingReflection && (
+            <div className="rounded-2xl bg-purple-50 border border-purple-100 px-4 py-3 text-sm text-purple-800 leading-relaxed">
+              {data.streamingReflection}
+              <span className="inline-block w-1.5 h-4 ml-0.5 bg-purple-400 rounded-sm align-middle animate-pulse" />
+            </div>
+          )}
         </div>
 
         {data.loading ? (
