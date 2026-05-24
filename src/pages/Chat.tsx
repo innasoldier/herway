@@ -74,8 +74,12 @@ const sendMessage = async () => {
         buffer += decoder.decode(value, { stream: true })
         const lines = buffer.split('\n')
         buffer = lines.pop() ?? ''
+        let done_streaming = false
         for (const line of lines) {
-          if (line.startsWith('event: message_stop')) break
+          if (line.startsWith('event: message_stop')) {
+            done_streaming = true
+            break
+          }
           if (!line.startsWith('data: ')) continue
           const payload = line.slice(6).trim()
           if (!payload) continue
@@ -92,6 +96,7 @@ const sendMessage = async () => {
             // skip malformed chunk
           }
         }
+        if (done_streaming) break
       }
     }
 
