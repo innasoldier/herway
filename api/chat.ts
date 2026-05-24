@@ -103,7 +103,6 @@ export default async function handler(req: Request): Promise<Response> {
       'Content-Type': 'application/json',
       'x-api-key': process.env.ANTHROPIC_API_KEY ?? '',
       'anthropic-version': '2023-06-01',
-      'anthropic-beta': 'messages-2023-06-01',
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-5',
@@ -115,5 +114,7 @@ export default async function handler(req: Request): Promise<Response> {
     signal: req.signal,
   })
 
-  return new Response(response.body, { headers: SSE_HEADERS })
+  const { readable, writable } = new TransformStream()
+  response.body?.pipeTo(writable)
+  return new Response(readable, { headers: SSE_HEADERS })
 }

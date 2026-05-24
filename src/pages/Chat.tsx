@@ -54,6 +54,7 @@ const sendMessage = async () => {
         const lines = buffer.split('\n')
         buffer = lines.pop() ?? ''
         for (const line of lines) {
+          if (line.startsWith('event: message_stop')) break
           if (!line.startsWith('data: ')) continue
           const payload = line.slice(6).trim()
           if (!payload) continue
