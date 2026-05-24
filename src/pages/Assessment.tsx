@@ -4,8 +4,10 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { supabase } from '../lib/supabase'
+import { PILLAR_COLORS } from '../types'
+import type { Pillar } from '../types'
 
-const QUESTIONS = [
+const QUESTIONS: { id: string; pillar: Pillar; text: string }[] = [
   { id: 'q1', pillar: 'identity', text: 'When was the last time you did something purely because you wanted to — not because it was useful, expected, or would make someone else happy?' },
   { id: 'q2', pillar: 'identity', text: 'Complete this sentence: The version of me that everyone sees is... but the version I hide is...' },
   { id: 'q3', pillar: 'relationships', text: 'Think of someone whose disappointment you work hardest to avoid. What would change if their opinion of you did not matter?' },
@@ -17,14 +19,6 @@ const QUESTIONS = [
   { id: 'q9', pillar: 'vision', text: 'What is something you want but have never let yourself say out loud?' },
   { id: 'q10', pillar: 'vision', text: 'Finish this sentence: I will know I am living my own life when...' },
 ]
-
-const PILLAR_COLORS: Record<string, string> = {
-  identity: 'bg-purple-100 text-purple-700',
-  body: 'bg-teal-100 text-teal-700',
-  relationships: 'bg-orange-100 text-orange-700',
-  career: 'bg-amber-100 text-amber-700',
-  vision: 'bg-pink-100 text-pink-700',
-}
 
 const answerSchema = z.object({
   answer: z.string().min(10, 'Please share a little more'),
