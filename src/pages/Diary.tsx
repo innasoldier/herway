@@ -156,18 +156,20 @@ export default function Diary() {
   const methods = useDiaryMethods(data)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-white px-4 py-10">
+    <div id="main-content" className="min-h-screen bg-gradient-to-br from-purple-50 to-white px-4 py-10">
       <div className="max-w-2xl mx-auto space-y-8">
         <h1 className="text-3xl font-semibold text-purple-900 tracking-tight">My diary</h1>
 
         <div className="bg-white rounded-3xl shadow-sm border border-purple-100 p-6 space-y-5">
-          <div>
-            <p className="text-sm font-medium text-purple-800 mb-2.5">How are you feeling?</p>
+          <fieldset className="border-0 p-0 m-0">
+            <legend className="text-sm font-medium text-purple-800 mb-2.5">How are you feeling?</legend>
             <div className="flex gap-3">
               {([1, 2, 3, 4, 5] as const).map(n => (
                 <button
                   key={n}
                   onClick={() => data.setMood(n)}
+                  aria-pressed={data.mood === n}
+                  aria-label={`Mood ${n}`}
                   className={`text-2xl rounded-2xl px-3 py-2 transition ${
                     data.mood === n
                       ? 'bg-purple-100 ring-2 ring-purple-400'
@@ -178,15 +180,16 @@ export default function Diary() {
                 </button>
               ))}
             </div>
-          </div>
+          </fieldset>
 
-          <div>
-            <p className="text-sm font-medium text-purple-800 mb-2.5">Area of focus</p>
+          <fieldset className="border-0 p-0 m-0">
+            <legend className="text-sm font-medium text-purple-800 mb-2.5">Area of focus</legend>
             <div className="flex flex-wrap gap-2">
               {PILLARS.map(p => (
                 <button
                   key={p}
                   onClick={() => data.setPillar(p)}
+                  aria-pressed={data.pillar === p}
                   className={`rounded-full px-4 py-1.5 text-xs font-medium capitalize transition ${
                     data.pillar === p
                       ? 'bg-purple-600 text-white'
@@ -197,18 +200,25 @@ export default function Diary() {
                 </button>
               ))}
             </div>
+          </fieldset>
+
+          <div>
+            <label htmlFor="diary-content" className="block text-sm font-medium text-purple-800 mb-1.5">
+              What's on your mind
+            </label>
+            <textarea
+              id="diary-content"
+              value={data.content}
+              onChange={e => data.setContent(e.target.value)}
+              placeholder="What's on your mind today..."
+              aria-describedby={data.error ? 'diary-error' : undefined}
+              style={{ minHeight: '120px' }}
+              className="w-full rounded-2xl border border-purple-200 px-4 py-3 text-sm text-gray-800 placeholder-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition resize-y"
+            />
           </div>
 
-          <textarea
-            value={data.content}
-            onChange={e => data.setContent(e.target.value)}
-            placeholder="What's on your mind today..."
-            style={{ minHeight: '120px' }}
-            className="w-full rounded-2xl border border-purple-200 px-4 py-3 text-sm text-gray-800 placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition resize-y"
-          />
-
           {data.error && (
-            <div className="rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600">
+            <div id="diary-error" role="alert" className="rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600">
               {data.error}
             </div>
           )}
@@ -222,7 +232,7 @@ export default function Diary() {
           </button>
 
           {data.streamingReflection && (
-            <div className="rounded-2xl bg-purple-50 border border-purple-100 px-4 py-3 text-sm text-purple-800 leading-relaxed">
+            <div aria-live="polite" aria-atomic="false" className="rounded-2xl bg-purple-50 border border-purple-100 px-4 py-3 text-sm text-purple-800 leading-relaxed">
               {data.streamingReflection}
               <span className="inline-block w-1.5 h-4 ml-0.5 bg-purple-400 rounded-sm align-middle animate-pulse" />
             </div>

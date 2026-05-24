@@ -81,7 +81,7 @@ export default function Signup() {
   const methods = useSignupMethods(data)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-white flex items-center justify-center p-4">
+    <div id="main-content" className="min-h-screen bg-gradient-to-br from-purple-50 to-white flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-semibold text-purple-900 tracking-tight">Create your account</h1>
@@ -102,6 +102,7 @@ export default function Signup() {
                 value={data.name}
                 onChange={e => data.setName(e.target.value)}
                 placeholder="Your name"
+                aria-describedby={data.error ? 'signup-error' : undefined}
                 className="w-full rounded-xl border border-purple-200 px-4 py-3 text-sm text-gray-800 placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition"
               />
             </div>
@@ -118,6 +119,7 @@ export default function Signup() {
                 value={data.email}
                 onChange={e => data.setEmail(e.target.value)}
                 placeholder="you@example.com"
+                aria-describedby={data.error ? 'signup-error' : undefined}
                 className="w-full rounded-xl border border-purple-200 px-4 py-3 text-sm text-gray-800 placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition"
               />
             </div>
@@ -135,12 +137,13 @@ export default function Signup() {
                 value={data.password}
                 onChange={e => data.setPassword(e.target.value)}
                 placeholder="••••••••"
+                aria-describedby={data.error ? 'signup-error' : undefined}
                 className="w-full rounded-xl border border-purple-200 px-4 py-3 text-sm text-gray-800 placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition"
               />
             </div>
 
             {data.error && (
-              <div className="rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600">
+              <div id="signup-error" role="alert" className="rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600">
                 {data.error}
               </div>
             )}

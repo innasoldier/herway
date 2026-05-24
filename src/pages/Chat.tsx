@@ -132,7 +132,7 @@ const sendMessage = async () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-white flex flex-col">
+    <div id="main-content" className="min-h-screen bg-gradient-to-br from-purple-50 to-white flex flex-col">
       <div className="flex-1 overflow-y-auto px-4 py-8 flex flex-col gap-4 max-w-2xl mx-auto w-full">
         {messages.length === 0 && (
           <div className="flex-1 flex flex-col items-center justify-center text-center pt-20">

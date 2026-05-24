@@ -113,9 +113,14 @@ export default function Assessment() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-white">
+    <div id="main-content" className="min-h-screen bg-gradient-to-br from-purple-50 to-white">
       <div className="w-full h-1 bg-purple-100">
         <div
+          role="progressbar"
+          aria-valuenow={data.currentQuestion}
+          aria-valuemin={0}
+          aria-valuemax={10}
+          aria-label="Assessment progress"
           className="h-1 bg-purple-500 transition-all duration-500"
           style={{ width: `${progress}%` }}
         />
@@ -143,6 +148,7 @@ export default function Assessment() {
               style={{ minHeight: '140px' }}
               onInput={autoResize}
               disabled={data.saving}
+              autoFocus
               className="w-full rounded-2xl border border-purple-200 px-4 py-3 text-sm text-gray-800 placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition resize-none disabled:opacity-50"
             />
 
@@ -162,6 +168,7 @@ export default function Assessment() {
                   type="button"
                   onClick={methods.handleBack}
                   disabled={data.saving}
+                  aria-label="Go to previous question"
                   className="rounded-xl border border-purple-200 text-purple-600 hover:bg-purple-50 disabled:opacity-50 px-5 py-3 text-sm font-medium transition"
                 >
                   Back
@@ -170,6 +177,7 @@ export default function Assessment() {
               <button
                 type="submit"
                 disabled={data.saving}
+                aria-label="Submit answer and continue"
                 className="flex-1 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium py-3 text-sm transition"
               >
                 {data.saving ? 'Saving…' : isLast ? 'Finish' : 'Continue'}
