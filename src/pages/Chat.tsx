@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -12,6 +12,8 @@ export default function Chat() {
   const [isStreaming, setIsStreaming] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
+  const queueRef = useRef<string[]>([])
+  const isProcessingRef = useRef<boolean>(false)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -21,11 +23,30 @@ export default function Chat() {
     return () => { abortControllerRef.current?.abort() }
   }, [])
 
+  const processQueue = useCallback(async () => {
+    if (isProcessingRef.current) return
+    isProcessingRef.current = true
+    while (queueRef.current.length > 0) {
+      const text = queueRef.current.shift()!
+      setMessages(prev => {
+        const updated = [...prev]
+        const last = updated[updated.length - 1]
+        updated[updated.length - 1] = { ...last, content: last.content + text }
+        return updated
+      })
+      await new Promise(resolve => setTimeout(resolve, 18))
+    }
+    isProcessingRef.current = false
+  }, [])
+
 const sendMessage = async () => {
   const text = input.trim()
   if (!text || isStreaming) return
 
   const history = messages.map(({ role, content }) => ({ role, content }))
+
+  queueRef.current = []
+  isProcessingRef.current = false
 
   setInput('')
   setMessages(prev => [...prev, { role: 'user', content: text }])
@@ -64,15 +85,8 @@ const sendMessage = async () => {
               parsed.type === 'content_block_delta' &&
               parsed.delta?.type === 'text_delta'
             ) {
-              setMessages(prev => {
-                const updated = [...prev]
-                const last = updated[updated.length - 1]
-                updated[updated.length - 1] = {
-                  ...last,
-                  content: last.content + parsed.delta.text,
-                }
-                return updated
-              })
+              queueRef.current.push(parsed.delta.text)
+              processQueue()
             }
           } catch {
             // skip malformed chunk
