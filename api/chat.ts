@@ -1,10 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk'
-
 export const config = { runtime: 'edge' }
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-})
 
 const CRISIS_PHRASES = [
   'hurt myself',
@@ -62,13 +56,17 @@ const SSE_HEADERS = {
   'Access-Control-Allow-Origin': '*',
 }
 
-function sseStream(chunks: string[]): Response {
+function crisisResponse(): Response {
   const encoder = new TextEncoder()
   const stream = new ReadableStream({
     start(controller) {
-      for (const chunk of chunks) {
-        controller.enqueue(encoder.encode(chunk))
-      }
+      const delta = JSON.stringify({
+        type: 'content_block_delta',
+        index: 0,
+        delta: { type: 'text_delta', text: CRISIS_MESSAGE },
+      })
+      controller.enqueue(encoder.encode(`event: content_block_delta\ndata: ${delta}\n\n`))
+      controller.enqueue(encoder.encode(`event: message_stop\ndata: ${JSON.stringify({ type: 'message_stop' })}\n\n`))
       controller.close()
     },
   })
@@ -92,52 +90,30 @@ export default async function handler(req: Request): Promise<Response> {
   }
 
   const isCrisis = CRISIS_PHRASES.some(phrase => message.toLowerCase().includes(phrase))
-  if (isCrisis) {
-    return sseStream([
-      `data: ${JSON.stringify({ text: CRISIS_MESSAGE })}\n\n`,
-      'data: [DONE]\n\n',
-    ])
-  }
+  if (isCrisis) return crisisResponse()
 
   const conversationMessages: MessageParam[] = [
     ...messages,
     { role: 'user', content: message },
   ]
 
-  const encoder = new TextEncoder()
-  const stream = new ReadableStream({
-    async start(controller) {
-      try {
-        const claudeStream = anthropic.messages.stream({
-          model: 'claude-sonnet-4-5',
-          max_tokens: 1024,
-          system: SYSTEM_PROMPT,
-          messages: conversationMessages,
-        })
-
-        for await (const event of claudeStream) {
-          if (
-            event.type === 'content_block_delta' &&
-            event.delta.type === 'text_delta'
-          ) {
-            controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify({ text: event.delta.text })}\n\n`)
-            )
-          }
-        }
-
-        controller.enqueue(encoder.encode('data: [DONE]\n\n'))
-      } catch (error) {
-        const msg =
-          error instanceof Anthropic.APIError
-            ? error.message
-            : 'An unexpected error occurred'
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: msg })}\n\n`))
-      } finally {
-        controller.close()
-      }
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': process.env.ANTHROPIC_API_KEY ?? '',
+      'anthropic-version': '2023-06-01',
+      'anthropic-beta': 'messages-2023-06-01',
     },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 1024,
+      stream: true,
+      system: SYSTEM_PROMPT,
+      messages: conversationMessages,
+    }),
+    signal: req.signal,
   })
 
-  return new Response(stream, { headers: SSE_HEADERS })
+  return new Response(response.body, { headers: SSE_HEADERS })
 }

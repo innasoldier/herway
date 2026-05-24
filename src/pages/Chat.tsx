@@ -30,11 +30,7 @@ const sendMessage = async () => {
   setInput('')
   setMessages(prev => [...prev, { role: 'user', content: text }])
   setIsStreaming(true)
-  setMessages(prev => [...prev, {
-    role: 'assistant',
-    content: '...',
-    streaming: true
-  }])
+  setMessages(prev => [...prev, { role: 'assistant', content: '', streaming: true }])
 
   try {
     abortControllerRef.current = new AbortController()
@@ -46,15 +42,47 @@ const sendMessage = async () => {
       signal: abortControllerRef.current.signal,
     })
 
-    const data = await response.json()
+    const reader = response.body?.getReader()
+    const decoder = new TextDecoder()
+
+    if (reader) {
+      let buffer = ''
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() ?? ''
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue
+          const payload = line.slice(6).trim()
+          if (!payload) continue
+          try {
+            const parsed = JSON.parse(payload)
+            if (
+              parsed.type === 'content_block_delta' &&
+              parsed.delta?.type === 'text_delta'
+            ) {
+              setMessages(prev => {
+                const updated = [...prev]
+                const last = updated[updated.length - 1]
+                updated[updated.length - 1] = {
+                  ...last,
+                  content: last.content + parsed.delta.text,
+                }
+                return updated
+              })
+            }
+          } catch {
+            // skip malformed chunk
+          }
+        }
+      }
+    }
 
     setMessages(prev => {
       const updated = [...prev]
-      updated[updated.length - 1] = {
-        role: 'assistant',
-        content: data.text ?? data.error ?? 'Something went wrong.',
-        streaming: false,
-      }
+      updated[updated.length - 1] = { ...updated[updated.length - 1], streaming: false }
       return updated
     })
 

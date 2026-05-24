@@ -109,12 +109,16 @@ const useDiaryMethods = (data: ReturnType<typeof useDiaryData>) => {
           for (const line of lines) {
             if (!line.startsWith('data: ')) continue
             const payload = line.slice(6)
-            if (payload === '[DONE]') break
+            if (payload === '[DONE]') continue
             try {
               const parsed = JSON.parse(payload)
-              if (parsed.text) {
-                aiReflection += parsed.text
-                data.setStreamingReflection(prev => prev + parsed.text)
+              if (
+                parsed.type === 'content_block_delta' &&
+                parsed.delta?.type === 'text_delta'
+              ) {
+                const text = parsed.delta.text
+                aiReflection += text
+                data.setStreamingReflection(prev => prev + text)
               }
             } catch {
               // skip malformed chunk
