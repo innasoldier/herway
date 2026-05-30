@@ -5,6 +5,17 @@ export default async function handler(req: Request): Promise<Response> {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 })
   }
 
+  const debugEnv = {
+    hasSupabaseUrl: !!process.env.SUPABASE_URL,
+    hasServiceRole: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    hasAnthropicKey: !!process.env.ANTHROPIC_API_KEY,
+    supabaseUrlStart: process.env.SUPABASE_URL?.slice(0, 20) ?? 'missing',
+  }
+  return new Response(JSON.stringify({ debug: debugEnv }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  })
+
   try {
     const { userId } = await req.json() as { userId: string }
 
