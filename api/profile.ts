@@ -13,7 +13,7 @@ export default async function handler(req: Request): Promise<Response> {
     }
 
     const answersRes = await fetch(
-      `${process.env.VITE_SUPABASE_URL}/rest/v1/assessment_answers?user_id=eq.${userId}&select=*`,
+      `${process.env.SUPABASE_URL}/rest/v1/assessment_answers?user_id=eq.${userId}&select=*`,
       {
         headers: {
           'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
@@ -68,7 +68,7 @@ export default async function handler(req: Request): Promise<Response> {
     const summary: string = aiData.content?.[0]?.text ?? ''
 
     await fetch(
-      `${process.env.VITE_SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`,
+      `${process.env.SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`,
       {
         method: 'PATCH',
         headers: {
